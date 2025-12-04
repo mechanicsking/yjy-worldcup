@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>유재영 이상형 월드컵</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #fafafa;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #game-area {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .choice {
+      width: 300px;
+      height: 300px;
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 3px solid #ddd;
+      transition: 0.2s;
+    }
+
+    .choice:hover {
+      transform: scale(1.05);
+      border-color: #444;
+    }
+
+    .choice img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #round-info {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+
+    #winner img {
+      width: 350px;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>✨ 유재영 이상형 월드컵 ✨</h1>
+  <div id="round-info"></div>
+
+  <div id="game-area"></div>
+
+  <div id="winner" style="display:none;">
+    <h2>🏆 최종 우승 사진 🏆</h2>
+    <img id="winner-img">
+  </div>
+
+<script>
+  // -----------------------------
+  // ① 여기에 네가 넣을 이미지들 추가하면 됨
+  // -----------------------------
+  let images = [
+    "images/yjy1.png",
+    "images/yjy2.jpg",
+    "images/yjy3.png",
+    "images/yjy4.jpg",
+    "images/yjy5.jpg",
+    "images/yjy6.jpg",
+    "images/yjy7.jpg",
+    "images/yjy8.jpg"
+  ];
+
+  // 섞기 (랜덤 순서로 시작)
+  images = images.sort(() => Math.random() - 0.5);
+
+  let currentRound = [...images];   // 이번 라운드 참가자
+  let nextRound = [];               // 승자들 저장
+  let index = 0;                    // 현재 대결 index
+
+  function updateRoundInfo() {
+    if (currentRound.length === 1) {
+      document.getElementById("round-info").innerText = "결승전";
+    } else {
+      document.getElementById("round-info").innerText =
+        `${currentRound.length}강 진행 중 (${index / 2 + 1}번째 매치)`;
+    }
+  }
+
+  function showMatch() {
+    const gameArea = document.getElementById("game-area");
+
+    // 라운드가 끝났다면 다음 라운드로 이동
+    if (index >= currentRound.length) {
+      if (nextRound.length === 1) {
+        showWinner(nextRound[0]);
+        return;
+      }
+      currentRound = [...nextRound];
+      nextRound = [];
+      index = 0;
+    }
+
+    updateRoundInfo();
+
+    // 두 개 이미지 선택
+    const img1 = currentRound[index];
+    const img2 = currentRound[index + 1];
+
+    gameArea.innerHTML = `
+      <div class="choice" onclick="selectWinner('${img1}')">
+        <img src="${img1}">
+      </div>
+      <div class="choice" onclick="selectWinner('${img2}')">
+        <img src="${img2}">
+      </div>
+    `;
+  }
+
+  function selectWinner(winnerImg) {
+    nextRound.push(winnerImg);
+    index += 2;
+    showMatch();
+  }
+
+  function showWinner(img) {
+    document.getElementById("game-area").style.display = "none";
+    document.getElementById("round-info").style.display = "none";
+
+    const winnerArea = document.getElementById("winner");
+    document.getElementById("winner-img").src = img;
+
+    winnerArea.style.display = "block";
+  }
+
+  // 시작
+  showMatch();
+</script>
+
+</body>
+</html>
