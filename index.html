@@ -3,38 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <title>유재영 이상형 월드컵</title>
+
+  <!-- 폭죽 효과 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
   <style>
     body {
-      font-family: sans-serif;
+      font-family: "Pretendard", sans-serif;
       text-align: center;
-      background: #fafafa;
-      padding: 30px;
+      background: linear-gradient(135deg, #f1f1f1, #dfe9f3);
+      padding: 40px;
     }
 
     h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    #round-info {
+      font-size: 22px;
       margin-bottom: 20px;
+      font-weight: 600;
     }
 
     #game-area {
       display: flex;
       justify-content: center;
-      gap: 40px;
-      margin-top: 40px;
+      gap: 50px;
+      margin-top: 30px;
     }
 
     .choice {
-      width: 300px;
-      height: 300px;
-      border-radius: 15px;
+      width: 320px;
+      height: 320px;
+      border-radius: 18px;
       overflow: hidden;
       cursor: pointer;
-      border: 3px solid #ddd;
-      transition: 0.2s;
+      border: 4px solid white;
+      box-shadow: 0px 10px 20px rgba(0,0,0,0.15);
+      transition: 0.25s;
+      background: white;
     }
 
     .choice:hover {
-      transform: scale(1.05);
-      border-color: #444;
+      transform: scale(1.06);
+      box-shadow: 0px 15px 32px rgba(0,0,0,0.25);
     }
 
     .choice img {
@@ -43,17 +56,23 @@
       object-fit: cover;
     }
 
-    #round-info {
-      font-size: 22px;
-      margin-top: 20px;
+    #winner-area {
+      display: none;
+      margin-top: 40px;
     }
 
-    #winner img {
-      width: 350px;
-      border-radius: 15px;
-      margin-top: 20px;
+    #winner-area img {
+      width: 400px;
+      border-radius: 20px;
+      box-shadow: 0px 12px 30px rgba(0,0,0,0.25);
+    }
+
+    #winner-area h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
     }
   </style>
+
 </head>
 <body>
 
@@ -62,46 +81,42 @@
 
   <div id="game-area"></div>
 
-  <div id="winner" style="display:none;">
+  <!-- 우승 화면 -->
+  <div id="winner-area">
     <h2>🏆 최종 우승 사진 🏆</h2>
     <img id="winner-img">
   </div>
 
 <script>
   // -----------------------------
-  // ① 여기에 네가 넣을 이미지들 추가하면 됨
+  // ① 16강 이미지 넣기 (파일명만 맞추면 됨)
   // -----------------------------
   let images = [
-    "images/yjy1.png",
-    "images/yjy2.jpg",
-    "images/yjy3.png",
-    "images/yjy4.jpg",
-    "images/yjy5.jpg",
-    "images/yjy6.jpg",
-    "images/yjy7.jpg",
-    "images/yjy8.jpg"
+    "images/yjy1.png", "images/yjy2.jpg", "images/yjy3.png", "images/yjy4.jpg",
+    "images/yjy5.jpg", "images/yjy6.jpg", "images/yjy7.jpg", "images/yjy8.jpg",
+    "images/yjy9.jpg", "images/yjy10.png", "images/yjy11.jpg", "images/yjy12.jpg",
+    "images/yjy13.jpg", "images/yjy14.jpg", "images/yjy15.jpg", "images/yjy16.jpg"
   ];
 
-  // 섞기 (랜덤 순서로 시작)
+  // 랜덤 섞기
   images = images.sort(() => Math.random() - 0.5);
 
-  let currentRound = [...images];   // 이번 라운드 참가자
-  let nextRound = [];               // 승자들 저장
-  let index = 0;                    // 현재 대결 index
+  let currentRound = [...images];
+  let nextRound = [];
+  let index = 0;
 
   function updateRoundInfo() {
-    if (currentRound.length === 1) {
+    if (currentRound.length === 2) {
       document.getElementById("round-info").innerText = "결승전";
     } else {
       document.getElementById("round-info").innerText =
-        `${currentRound.length}강 진행 중 (${index / 2 + 1}번째 매치)`;
+        `${currentRound.length}강 (${index / 2 + 1} / ${currentRound.length / 2} 매치)`;
     }
   }
 
   function showMatch() {
     const gameArea = document.getElementById("game-area");
 
-    // 라운드가 끝났다면 다음 라운드로 이동
     if (index >= currentRound.length) {
       if (nextRound.length === 1) {
         showWinner(nextRound[0]);
@@ -114,7 +129,6 @@
 
     updateRoundInfo();
 
-    // 두 개 이미지 선택
     const img1 = currentRound[index];
     const img2 = currentRound[index + 1];
 
@@ -138,15 +152,41 @@
     document.getElementById("game-area").style.display = "none";
     document.getElementById("round-info").style.display = "none";
 
-    const winnerArea = document.getElementById("winner");
     document.getElementById("winner-img").src = img;
+    document.getElementById("winner-area").style.display = "block";
 
-    winnerArea.style.display = "block";
+    // 🏆 폭죽 효과 실행
+    startConfetti();
+  }
+
+  // 🎉 폭죽(Confetti) 실행 함수
+  function startConfetti() {
+    var duration = 3 * 1000;
+    var end = Date.now() + duration;
+
+    (function frame() {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 }
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 }
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    })();
   }
 
   // 시작
   showMatch();
-</script>
 
+</script>
 </body>
 </html>
